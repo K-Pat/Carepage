@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+	<meta charset = "UTF-8">
+	<link rel = "stylesheet" href="style.css">
+	<title> Carepage </title>
+</head>
+<body>
+	<header>
+		<h1>Carepage</h1>
+	</header>
+
+
+
+	<form action="/add" method="POST">
+		<fieldset>
+			<legend>Care Family</legend>
+			<label>Care Member:</label>
+			<input type="text" name="member1" placeholder="Name"><br><br>
+
+			<label>Address:</label>
+			<input type="text" name="address1" placeholder="Address"><br><br>
+
+			<label>City:</label>
+			<input type="text" name="city1" placeholder="City"><br><br>
+
+			<label>State:</label>
+			<input type="text" name="state1" placeholder="State"><br><br>
+
+			<label>Zip Code:</label>
+			<input type="text" name="zip1" placeholder="Zipcode"><br><br>
+
+			<label>Mobile:</label>
+			<input type="tel" name="mobile1" placeholder="Phone Number"><br><br>
+
+			<label>Email:</label>
+			<input type="email" name="email1" placeholder="xxx@gmail.com"><br><br>
+
+			<label>Nationality:</label>
+			<input type="text" name="nation1" placeholder="Nationality"><br><br>
+
+			<label>Father's Nationality:</label>
+			<input type="text" name="fnation1" placeholder="Father's Nationality"><br><br>
+
+			<label>Mother's Nationality:</label>
+			<input type="text" name="mnation1" placeholder="Mother's Nationality"><br><br>
+
+            <button type ="reset">Reset</button>
+            <button type ="submit">Submit</button>
+		</fieldset>
+    </form>
+    <form action="/add2" method="POST">
+		<fieldset>
+			<legend>Care Family</legend>
+			<label>Care Member 2:</label>
+			<input type="text" name="member2" placeholder="Name"><br><br>
+
+			<label>Address:</label>
+			<input type="text" name="address2" placeholder="Address"><br><br>
+
+			<label>City:</label>
+			<input type="text" name="city2" placeholder="City"><br><br>
+
+			<label>State:</label>
+			<input type="text" name="state2" placeholder="State"><br><br>
+
+			<label>Zip Code:</label>
+			<input type="text" name="zip2" placeholder="Zipcode"><br><br>
+
+			<label>Mobile:</label>
+			<input type="tel" name="mobile2" placeholder="Phone Number"><br><br>
+
+			<label>Email:</label>
+			<input type="email" name="email2" placeholder="xxx@gmail.com"><br><br>
+
+			<label>Nationality:</label>
+			<input type="text" name="nation2" placeholder="Nationality"><br><br>
+
+			<label>Father's Nationality:</label>
+			<input type="text" name="fnation2" placeholder="Father's Nationality"><br><br>
+
+			<label>Mother's Nationality:</label>
+			<input type="text" name="mnation2" placeholder="Mother's Nationality"><br><br>
+
+            <button type ="reset">Reset</button>
+            <button type ="submit">Submit</button>
+		</fieldset>
+    </form>
+    <form action="/view" method="POST">
+        <fieldset>
+                <h3>View a Care Member</h3>
+                <label>Member Name</label>
+                <input type="text" name="id" placeholder="Name of Caremember" required>
+                <br><br>
+                <button type ="reset">Reset</button>
+                <button type ="submit">View My Data</button>
+                <br><br><br>
+        </fieldset>
+    </form>
+</body>
+</html>
