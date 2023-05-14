@@ -6,7 +6,8 @@ var bodyParser = require('body-parser');
 var helmet = require('helmet');
 var rateLimit = require("express-rate-limit");
 
-
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 var app = express();
 var server = http.createServer(app);
@@ -16,20 +17,76 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 
-
 var db = new sqlite3.Database('./database/carepage.db');
-
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname,'./public')));
 app.use(helmet());
 app.use(limiter);
 
-db.run('CREATE TABLE IF NOT EXISTS carepage(name TEXT, address TEXT, city TEXT, state TEXT, zip TEXT, mobile TEXT, email TEXT, nation TEXT, fnation TEXT, mnation TEXT)');
+db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, email TEXT UNIQUE, password TEXT)');
 
-app.get('/', function(req,res){
-  res.sendFile(path.join(__dirname,'./public/form.html'));
+app.get('/',(req,res) => {
+  res.sendFile(path.join(__dirname,'./public/index.html'));
 });
+
+app.post('/register', async (req, res) => {
+  try{
+      let username = req.body.username;
+      let email = req.body.email;
+      let password = req.body.password;
+
+      db.get("SELECT * FROM users WHERE email = ?", email, async function(err, row) {
+        if(err) {
+          console.log(err);
+          res.send("Internal server error");
+          return;
+        }
+        if(row) {
+          res.send("<div align ='center'><h2>Email already used</h2></div><br><br><div align='center'><a href='./registration.html'>Register again</a></div>");
+          return;
+        }
+
+        let hashPassword = await bcrypt.hash(password, saltRounds);
+        db.run('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashPassword], function(err) {
+          if(err) {
+            console.log(err);
+            res.send("Internal server error");
+            return;
+          }
+          console.log('User registered: ', username, email);
+
+          res.send("<div align ='center'><h2>Registration successful</h2></div><br><br><div align='center'><a href='./login.html'>login</a></div><br><br><div align='center'><a href='./registration.html'>Register another user</a></div>");
+        });
+      });
+  } catch{
+      res.send("Internal server error");
+  }
+});
+
+app.post('/login', async (req, res) => {
+  try {
+    db.get('SELECT * FROM users WHERE email = ?', req.body.email, async (err, row) => {
+      if (err) {
+        return res.send("Internal server error");
+      }
+      if (!row) {
+        return res.send("<div align ='center'><h2>Invalid email or password</h2></div><br><br><div align ='center'><a href='./login.html'>login again</a></div>");
+      }
+
+      const passwordMatch = await bcrypt.compare(req.body.password, row.password);
+      if (passwordMatch) {
+        let usrname = row.username;
+        res.send(`<div align ='center'><h2>login successful</h2></div><br><br><br><div align ='center'><h3>Hello ${usrname}</h3></div><br><br><div align='center'><a href='./login.html'>logout</a></div>`);
+      } else {
+        res.send("<div align ='center'><h2>Invalid email or password</h2></div><br><br><div align ='center'><a href='./login.html'>login again</a></div>");
+      }
+    });
+  } catch {
+    res.send("Internal server error");
+  }
+});
+
 
 
 // Add
@@ -99,9 +156,6 @@ app.post('/delete', function(req,res){
 
 });
 
-
-
-
 // Closing the database connection.
 app.get('/close', function(req,res){
   db.close((err) => {
@@ -114,8 +168,6 @@ app.get('/close', function(req,res){
   });
 
 });
-
-
 
 server.listen(3000, function(){
   console.log("server is listening on port: 3000");
