@@ -5,8 +5,6 @@ var path = require("path");
 var bodyParser = require('body-parser');
 var helmet = require('helmet');
 var rateLimit = require("express-rate-limit");
-require('dotenv').config();
-
 
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
