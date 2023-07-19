@@ -101,6 +101,8 @@ app.post('/login', async (req, res) => {
 // Remaining code with all db.* replaced with client.query or similar
 // Please note that carepage table has not been defined
 
-server.listen(3000, function(){
-  console.log("server is listening on port: 3000");
+var port = process.env.PORT || 3000;
+
+server.listen(port, function(){
+  console.log("server is listening on port: " + port);
 });
