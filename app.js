@@ -17,10 +17,13 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 
-const connectionString = process.env.DATABASE_URL; // you can directly use process.env.DATABASE_URL on Heroku
+const connectionString = process.env.DATABASE_URL; // No need to assign, Heroku automatically sets this
 
 const client = new Client({
   connectionString: connectionString,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 client.connect();
