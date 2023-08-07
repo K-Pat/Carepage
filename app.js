@@ -18,14 +18,22 @@ const limiter = rateLimit({
 });
 
 const connectionString = process.env.DATABASE_URL; // No need to assign, Heroku automatically sets this
-
+/*
 const client = new Client({
   connectionString: connectionString,
   ssl: {
     rejectUnauthorized: false
   }
 });
+*/
 
+//WORKING CLIENT ABOVE WITHOUT CONDITIONAL HEROKU MODIFICATIONS
+
+
+const client = new Client({
+  connectionString: connectionString,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
 client.connect();
 
 app.use(bodyParser.urlencoded({extended: false}));
