@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Homepage</title>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Welcome, <span id="username"></span>!</h1>
+    <form id="updateDetailsForm" action="/updateDetails" method="POST">
+        Name: <input type="text" name="name" id="name"><br><br>
+        Birthday: <input type="date" name="birthday" id="birthday"><br><br>
+        Address: <input type="text" name="address" id="address"><br><br>
+        Phone: <input type="text" name="phone" id="phone"><br><br>
+        <input type="submit" value="Update Details">
+    </form>
+
+    <!-- Added elements for message and button -->
+    <div id="updateMessage"></div>
+    <button id="viewDetailsButton" style="display:none;" onclick="location.href='/viewDetails'">View Updated Details</button>
+
+    <script>
+        // This will display the username from a query parameter.
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById('username').textContent = urlParams.get('username');
+
+        // AJAX Request
+        $(document).ready(function() {
+            $("#updateDetailsForm").on("submit", function(event) {
+                event.preventDefault();
+                
+                $.post("/updateDetails", $(this).serialize(), function(response) {
+                    if (response.success) {
+                        $("#updateMessage").text("Success updating details!");
+                        $("#viewDetailsButton").show();
+                    } else {
+                        $("#updateMessage").text("Failed updating details!");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
