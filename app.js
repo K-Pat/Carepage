@@ -34,9 +34,20 @@ const client = new Client({
 
 const client = new Client({
   connectionString: connectionString,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: {
+    rejectUnauthorized: false,
+    ca: process.env.NODE_ENV === 'production' ? [fs.readFileSync("/Users/kavyanpatel/Library/Application Support/Postgres/var-15/server.crt").toString()] : null
+  }
 });
-client.connect();
+
+client.connect(err => {
+  if (err) {
+    console.error('Failed to connect to database:', err.stack);
+  } else {
+    console.log('Connected to database.');
+  }
+});
+
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname,'./public')));
