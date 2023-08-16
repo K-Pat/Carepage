@@ -103,6 +103,22 @@ client.query('CREATE TABLE IF NOT EXISTS userDetails(userId INTEGER REFERENCES u
   if(err) throw err;
 });
 
+client.query('ALTER TABLE userDetails ADD COLUMN city TEXT', (err, res) => {
+  if (err) throw err;
+  console.log("City column added");
+});
+
+client.query('ALTER TABLE userDetails ADD COLUMN zipcode TEXT', (err, res) => {
+  if (err) throw err;
+  console.log("Zipcode column added");
+});
+
+client.query('ALTER TABLE userDetails ADD COLUMN nationality TEXT', (err, res) => {
+  if (err) throw err;
+  console.log("Nationality column added");
+});
+
+
 //client.query('ALTER TABLE userDetails ADD CONSTRAINT unique_userid UNIQUE (userid);');
 
 /*
@@ -228,14 +244,14 @@ try {
 */
 
 app.post('/updateDetails', ensureAuthenticated, async (req, res) => {
-  const { name, birthday, address, phone } = req.body;
+  const { name, birthday, address, phone, city, zipcode, nationality} = req.body;
   const userId = req.session.userId;  // Retrieve user ID from session
   
   if (!userId) {
     return res.send("User not logged in");
   }
   
-  client.query('INSERT INTO userDetails(userId, name, birthday, address, phone) VALUES ($1, $2, $3, $4, $5) ON CONFLICT(userId) DO UPDATE SET name = $2, birthday = $3, address = $4, phone = $5', [userId, name, birthday, address, phone], (err, result) => {
+  client.query('INSERT INTO userDetails(userId, name, birthday, address, phone, city, zipcode, nationality) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(userId) DO UPDATE SET name = $2, birthday = $3, address = $4, phone = $5, city = $6, zipcode = $7, nationality = $8',[userId, name, birthday, address, phone, city, zipcode, nationality], (err, result) => {
     if (err) {
       console.log(err);
       return res.json({ success: false });
