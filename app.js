@@ -102,7 +102,7 @@ app.use(session({
 client.query('CREATE TABLE IF NOT EXISTS userDetails(userId INTEGER REFERENCES users(id), name TEXT, birthday DATE, address TEXT, phone TEXT)', (err, res) => {
   if(err) throw err;
 });
-
+/*
 client.query('ALTER TABLE userDetails ADD COLUMN city TEXT', (err, res) => {
   if (err) throw err;
   console.log("City column added");
@@ -117,7 +117,7 @@ client.query('ALTER TABLE userDetails ADD COLUMN nationality TEXT', (err, res) =
   if (err) throw err;
   console.log("Nationality column added");
 });
-
+*/
 
 //client.query('ALTER TABLE userDetails ADD CONSTRAINT unique_userid UNIQUE (userid);');
 
@@ -286,6 +286,27 @@ app.get('/viewDetails', ensureAuthenticated, async (req, res) => {
   } catch (err) {
       console.error('Error fetching details:', err);
       return res.status(500).send('Internal Server Error');
+  }
+});
+
+app.get('/getUserDetails', ensureAuthenticated, async (req, res) => {
+  const userId = req.session.userId;
+  
+  if (!userId) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  try {
+    const result = await client.query('SELECT name, birthday, address, phone, city, zipcode, nationality FROM userDetails WHERE userId = $1', [userId]);
+    if (result.rows.length === 0) {
+        return res.json({ success: false, message: 'No details available for this user.' });
+    }
+    
+    const userDetail = result.rows[0];
+    return res.json({ success: true, data: userDetail });
+  } catch (err) {
+    console.error('Error fetching details:', err);
+    return res.json({ success: false, message: 'Internal Server Error' });
   }
 });
 

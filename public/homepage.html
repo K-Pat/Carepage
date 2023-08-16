@@ -1,12 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User Homepage</title>
-    <!-- Include jQuery -->
+    <title>User Carepage</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Added basic CSS for the page */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        form {
+            flex: 0 0 45%;
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        #currentDetails {
+            flex: 0 0 45%;
+            background: #e6e9f0;
+            padding: 20px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome, <span id="username"></span>!</h1>
+    <h1><span id="username"></span>'s Carepage</h1>
     <form id="updateDetailsForm" action="/updateDetails" method="POST">
         Name: <input type="text" name="name" id="name"><br><br>
         Birthday: <input type="date" name="birthday" id="birthday"><br><br>
@@ -18,24 +40,61 @@
         <input type="submit" value="Update Details">
     </form>
 
-    <!-- Added elements for message and button -->
+    <!-- Current Details Box -->
+    <div id="currentDetails">
+        <h2>Current Details</h2>
+        <div id="detailContent">Loading...</div>
+    </div>
+
     <div id="updateMessage"></div>
-    <button id="viewDetailsButton" style="display:none;" onclick="location.href='/viewDetails'">View Updated Details</button>
 
     <script>
-        // This will display the username from a query parameter.
         const urlParams = new URLSearchParams(window.location.search);
         document.getElementById('username').textContent = urlParams.get('username');
 
+        function updateDetailContent(data) {
+            if (!data.name) {
+                $("#detailContent").html("NO DETAILS");
+            } else {
+                $("#detailContent").html(`
+                    Name: ${data.name} <br>
+                    Birthday: ${data.birthday} <br>
+                    Address: ${data.address} <br>
+                    Phone: ${data.phone} <br>
+                    City: ${data.city} <br>
+                    Zipcode: ${data.zipcode} <br>
+                    Nationality: ${data.nationality}
+                `);
+            }
+        }
+
         // AJAX Request
         $(document).ready(function() {
+            // Fetch user details immediately on page load
+            $.get("/getUserDetails", function(response) {
+                if (response.success) {
+                    updateDetailContent(response.data);
+                } else {
+                    $("#detailContent").text(response.message);
+                }
+            });
+
+            // Handle the form submission
             $("#updateDetailsForm").on("submit", function(event) {
                 event.preventDefault();
                 
                 $.post("/updateDetails", $(this).serialize(), function(response) {
                     if (response.success) {
                         $("#updateMessage").text("Success updating details!");
-                        $("#viewDetailsButton").show();
+                        updateDetailContent({
+                            name: $("#name").val(),
+                            birthday: $("#birthday").val(),
+                            address: $("#address").val(),
+                            phone: $("#phone").val(),
+                            city: $("#city").val(),
+                            zipcode: $("#zipcode").val(),
+                            nationality: $("#nationality").val()
+                        });
                     } else {
                         $("#updateMessage").text("Failed updating details!");
                     }
