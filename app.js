@@ -5,6 +5,7 @@ var path = require("path");
 var bodyParser = require('body-parser');
 var helmet = require('helmet');
 var rateLimit = require("express-rate-limit");
+const fs = require('fs');
 
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -32,13 +33,20 @@ const client = new Client({
 //WORKING CLIENT ABOVE WITHOUT CONDITIONAL HEROKU MODIFICATIONS
 
 
+let sslOptions = {
+  rejectUnauthorized: false
+};
+
+// Check if we are NOT in production
+if (process.env.NODE_ENV !== 'production') {
+  sslOptions.ca = [fs.readFileSync("/Users/kavyanpatel/Library/Application Support/Postgres/var-15/server.crt").toString()];
+}
+
 const client = new Client({
   connectionString: connectionString,
-  ssl: {
-    rejectUnauthorized: false,
-    ca: process.env.NODE_ENV === 'production' ? [fs.readFileSync("/Users/kavyanpatel/Library/Application Support/Postgres/var-15/server.crt").toString()] : null
-  }
+  ssl: sslOptions
 });
+
 
 client.connect(err => {
   if (err) {
