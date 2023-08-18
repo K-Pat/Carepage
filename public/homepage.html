@@ -11,24 +11,35 @@
             display: flex;
             justify-content: space-between;
         }
+        /* New style for the container */
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap; /* This ensures that if the sections cannot fit side by side, they'll wrap to the next line */
+        }
 
+        /* Modify existing form styling to give a bit more spacing */
         form {
-            flex: 0 0 45%;
+            flex: 0 0 calc(30% - 20px); /* subtracting 20px to account for margins */
             background: #f3f4f6;
             padding: 20px;
             border-radius: 5px;
+            margin-right: 20px; /* added a margin for some spacing between sections */
         }
 
+        /* Lastly, the currentDetails styling: */
         #currentDetails {
-            flex: 0 0 45%;
+            flex: 0 0 calc(30% - 20px); /* subtracting 20px to account for margins */
             background: #e6e9f0;
             padding: 20px;
             border-radius: 5px;
         }
+
     </style>
 </head>
 <body>
     <h1><span id="username"></span>'s Carepage</h1>
+    <div class="main-container">
     <form id="updateDetailsForm" action="/updateDetails" method="POST">
         Name: <input type="text" name="name" id="name"><br><br>
         Birthday: <input type="date" name="birthday" id="birthday"><br><br>
@@ -45,9 +56,19 @@
         <h2>Current Details</h2>
         <div id="detailContent">Loading...</div>
     </div>
-
+    <div>
+        <h2>Save Contacts</h2>
+        <form id="contactForm" action="/saveContact" method="POST">
+            Name: <input type="text" name="contactName" id="contactName"><br><br>
+            Phone: <input type="text" name="contactPhone" id="contactPhone"><br><br>
+            Email: <input type="text" name="contactEmail" id="contactEmail"><br><br>
+            <input type="submit" value="Save Contact">
+        </form>
+        <h3>Your Contacts</h3>
+        <div id="contactsList">Loading...</div>
+    </div>
     <div id="updateMessage"></div>
-
+    </div>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         document.getElementById('username').textContent = urlParams.get('username');
@@ -67,9 +88,28 @@
                 `);
             }
         }
-
+        function loadContacts() {
+            $.get('/getContacts', (response) => {
+            if (response.success) {
+                let contactsHTML = "";
+                for (let contact of response.data) {
+                contactsHTML += `
+                    <p>
+                        Name: ${contact.contactName}<br>
+                        Phone: ${contact.contactPhone}<br>
+                        Email: ${contact.contactEmail}
+                </p>
+                `;
+                }   
+                $('#contactsList').html(contactsHTML);
+            } else {
+                $('#contactsList').html('Failed to load contacts.');
+            }
+        });
+        }
         // AJAX Request
         $(document).ready(function() {
+            loadContacts();
             // Fetch user details immediately on page load
             $.get("/getUserDetails", function(response) {
                 if (response.success) {
@@ -78,7 +118,22 @@
                     $("#detailContent").text(response.message);
                 }
             });
+            $('#contactForm').submit((e) => {
+                e.preventDefault();
+                const data = {
+                    contactName: document.querySelector('[name="contactName"]').value,
+                    contactPhone: document.querySelector('[name="contactPhone"]').value,
+                    contactEmail: document.querySelector('[name="contactEmail"]').value
+                };
 
+            $.post('/saveContact', data, (response) => {
+                if (response.success) {
+                    loadContacts();
+                } else {
+                    alert('Failed to save contact.');
+                }
+            });
+            });
             // Handle the form submission
             $("#updateDetailsForm").on("submit", function(event) {
                 event.preventDefault();
@@ -101,6 +156,8 @@
                 });
             });
         });
+
+
     </script>
 </body>
 </html>

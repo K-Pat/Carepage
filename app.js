@@ -61,6 +61,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname,'./public')));
 app.use(helmet());
 app.use(limiter);
+app.use(bodyParser.json());
 
 //table for username and passwords
 client.query('CREATE TABLE IF NOT EXISTS users(id SERIAL PRIMARY KEY, username TEXT, email TEXT UNIQUE, password TEXT)', (err, res) => {
@@ -143,6 +144,12 @@ setupDatabase().then(() => {
   console.error("Error setting up the database:", err);
 });
 */
+
+client.query('CREATE TABLE IF NOT EXISTS contacts(userId INTEGER REFERENCES users(id), contactName TEXT, contactPhone TEXT, contactEmail TEXT)', (err, res) => {
+  if(err) throw err;
+});
+
+
 app.get('/',(req,res) => {
   res.sendFile(path.join(__dirname,'./public/index.html'));
 });
@@ -260,6 +267,40 @@ app.post('/updateDetails', ensureAuthenticated, async (req, res) => {
   res.json({ success: true });
   });
 });
+
+app.post('/saveContact', ensureAuthenticated, async (req, res) => {
+  const { contactName, contactPhone, contactEmail } = req.body;
+  const userId = req.session.userId;
+  console.log(contactName, contactPhone, contactEmail);
+  if (!userId) {
+    return res.send("User not logged in");
+  }
+
+  try {
+    await client.query('INSERT INTO contacts(userId, contactName, contactPhone, contactEmail) VALUES ($1, $2, $3, $4)', [userId, contactName, contactPhone, contactEmail]);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Error saving contact:', err);
+    return res.json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+app.get('/getContacts', ensureAuthenticated, async (req, res) => {
+  const userId = req.session.userId;
+  
+  if (!userId) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  try {
+    const result = await client.query('SELECT contactName, contactPhone, contactEmail FROM contacts WHERE userId = $1', [userId]);
+    return res.json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error('Error fetching contacts:', err);
+    return res.json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
 
 app.get('/viewDetails', ensureAuthenticated, async (req, res) => {
   const userId = req.session.userId;
